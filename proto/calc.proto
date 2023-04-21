@@ -1,0 +1,27 @@
+syntax = "proto3";
+
+package testTask; //Your package
+
+option go_package = "testTask/pkg/api"; //generated Golang files path
+
+import "annotations.proto";
+
+service Api{
+  rpc CalculateSum(Request) returns (Response){
+    option (google.api.http) = {
+      post: "/calculation",
+      body: "*"
+    };
+  }
+}
+
+message Request{
+  repeated Numbers numbers = 1;
+}
+message Response{
+  int64 sum = 1;
+}
+
+message Numbers{
+  int64 nums = 1;
+}

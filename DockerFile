@@ -1,0 +1,15 @@
+FROM golang:1.20
+
+WORKDIR /testTask
+
+COPY server/server.go .
+COPY client/client.go .
+COPY pkg/api .
+COPY proto/ proto/
+COPY go.mod .
+COPY go.sum .
+
+RUN go build -o server
+RUN go build -o client
+
+CMD ["./testTask"]
