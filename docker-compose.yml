@@ -1,0 +1,25 @@
+version: "3.9"
+services:
+  server:
+    build:
+      context: .
+      dockerfile: DockerFile
+    container_name: my_server
+    ports:
+      - "9090:9090"
+    networks:
+      my-network:
+        aliases:
+          - server
+    command: ["go", "run", "server/server.go"]
+  client:
+    build:
+      context: .
+      dockerfile: DockerFile
+    container_name: my_client
+    networks:
+      my-network:
+    command: ["go", "run", "client/client.go", "--server=my_server:9090"]
+networks:
+  my-network:
+    driver: bridge

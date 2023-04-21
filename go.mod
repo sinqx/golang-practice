@@ -1,4 +1,4 @@
-module testTask
+module tt
 
 go 1.20
 

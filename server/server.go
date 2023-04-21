@@ -6,7 +6,7 @@ import (
 	"log"
 	"net"
 	"sync"
-	. "testTask/pkg/api"
+	. "tt/pkg/api"
 )
 
 type server struct {
@@ -46,7 +46,7 @@ func (s *server) CalculateSum(ctx context.Context, req *Request) (*Response, err
 }
 
 func main() {
-	listen, err := net.Listen("tcp", ":8888")
+	listen, err := net.Listen("tcp", ":9090")
 	if err != nil {
 		log.Fatalf("Error: %v", err)
 	}
