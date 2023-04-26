@@ -19,7 +19,9 @@ services:
     container_name: my_client
     networks:
       my-network:
-    command: ["go", "run", "client/client.go", "--server=my_server:9090"]
+    depends_on:
+      - server
+    command: ["go", "run", "client/client.go"]
 networks:
   my-network:
     driver: bridge

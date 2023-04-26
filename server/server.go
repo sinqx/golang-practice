@@ -6,19 +6,20 @@ import (
 	"log"
 	"net"
 	"sync"
-	. "tt/pkg/api"
+	. "testTask/pkg/api"
 )
 
 type server struct {
 	UnimplementedApiServer
 }
 
+type apiServer struct{}
+
 func (s *server) CalculateSum(ctx context.Context, req *Request) (*Response, error) {
 	var wg sync.WaitGroup
 	parts := 10                          // кол-во потоков
 	partSize := len(req.Numbers) / parts // кол-во чисел в потоке
 	results := make(chan int, parts)     // канал для получения результата
-
 	for i := 0; i < parts; i++ {
 		wg.Add(1)
 		start := i * partSize   // начало слайса
@@ -55,7 +56,7 @@ func main() {
 	RegisterApiServer(s, &server{})
 
 	log.Printf("Port: %v", listen.Addr())
-	if err := s.Serve(listen); err != nil {
-		log.Fatalf("Error: %v", err)
-	}
+	go func() {
+		log.Fatalln(s.Serve(listen))
+	}()
 }

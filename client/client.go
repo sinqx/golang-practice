@@ -6,12 +6,15 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 	"log"
-	"tt/pkg/api"
+	"testTask/pkg/api"
 )
 
 func main() {
 
-	conn, err := grpc.Dial("my_server:9090", grpc.WithTransportCredentials(insecure.NewCredentials()))
+	conn, err := grpc.Dial("localhost:9090/calculation",
+		grpc.WithTransportCredentials(insecure.NewCredentials()),
+		grpc.WithBlock())
+
 	if err != nil {
 		log.Fatalf("Error: %v", err)
 	}
