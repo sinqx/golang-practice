@@ -1,4 +1,4 @@
-FROM golang:1.20
+FROM golang:1.20-alpine
 
 ADD . /app/testTask
 
@@ -8,4 +8,5 @@ COPY . ./
 
 RUN go mod download
 
-RUN go build -o ./cmd/bin/server/server ./server && go build -o ./cmd/bin/client/client ./client
+#RUN go build -o ./cmd/bin/server/server ./server && go build -o ./cmd/bin/client/client ./client
+####################### not finished

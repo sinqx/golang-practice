@@ -7,21 +7,4 @@ services:
     container_name: my_server
     ports:
       - "9090:9090"
-    networks:
-      my-network:
-        aliases:
-          - server
-    command: ["go", "run", "server/server.go"]
-  client:
-    build:
-      context: .
-      dockerfile: DockerFile
-    container_name: my_client
-    networks:
-      my-network:
-    depends_on:
-      - server
-    command: ["go", "run", "client/client.go"]
-networks:
-  my-network:
-    driver: bridge
+############################# not finished

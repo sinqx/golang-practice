@@ -1,19 +1,19 @@
+// ///////////////////////////// deprecated ///////////////////////////////
 package main
 
 import (
 	"context"
 	"fmt"
 	"google.golang.org/grpc"
-	"google.golang.org/grpc/credentials/insecure"
 	"log"
-	"testTask/pkg/api"
+	"time"
+	"tt/pkg/api"
 )
 
 func main() {
 
-	conn, err := grpc.Dial("localhost:9090/calculation",
-		grpc.WithTransportCredentials(insecure.NewCredentials()),
-		grpc.WithBlock())
+	conn, err := grpc.DialContext(context.Background(), "localhost:8080",
+		grpc.WithInsecure(), grpc.WithBlock())
 
 	if err != nil {
 		log.Fatalf("Error: %v", err)
@@ -22,15 +22,20 @@ func main() {
 
 	c := api.NewApiClient(conn)
 
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+	defer cancel()
+
 	req := &api.Request{}
 	for i := 1; i <= 100000; i++ {
 		req.Numbers = append(req.Numbers, &api.Numbers{Nums: int64(i)})
 	}
 
-	res, err := c.CalculateSum(context.Background(), req)
+	res, err := c.CalculateSum(ctx, req)
 	if err != nil {
 		log.Fatalf("Error: %v", err)
 	}
 
 	fmt.Printf("Sum: %d\n", res.Sum)
+	//	fmt.Printf("Port: %d\n", conn.)
+
 }
