@@ -6,6 +6,7 @@ import (
 	"log"
 	"net"
 	"net/http"
+	"sync"
 
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	pb "tt/pkg/api"
@@ -59,10 +60,32 @@ func main() {
 }
 
 func (s *server) CalculateSum(ctx context.Context, req *pb.Request) (*pb.Response, error) {
-	var sum int64
-	for _, num := range req.Numbers {
-		sum += num.Nums
+	var wg sync.WaitGroup
+	parts := 10                          // кол-во потоков
+	partSize := len(req.Numbers) / parts // кол-во чисел в потоке
+	results := make(chan int, parts)     // канал для получения результата
+	for i := 0; i < parts; i++ {
+		wg.Add(1)
+		start := i * partSize   // начало слайса
+		end := start + partSize // конец слайса
+		go func() {
+			defer wg.Done()
+			sum := 0
+			for _, num := range req.Numbers[start:end] {
+				sum += int(num.Nums)
+			}
+			results <- sum
+		}()
 	}
 
-	return &pb.Response{Sum: sum}, nil
+	go func() {
+		wg.Wait()
+		close(results)
+	}()
+
+	total := 0
+	for res := range results {
+		total += res
+	}
+	return &pb.Response{Sum: int64(total)}, nil
 }
