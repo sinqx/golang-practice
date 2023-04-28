@@ -17,8 +17,8 @@ type server struct {
 }
 
 const (
-	grcpPort string = "9090"
-	httpPort string = "9091"
+	grcpPort string = ":9090"
+	httpPort string = ":9091"
 )
 
 func runHTTPServer(ctx context.Context) error {
@@ -30,11 +30,11 @@ func runHTTPServer(ctx context.Context) error {
 	}
 
 	log.Printf("HTTP server: %s\n", httpPort)
-	return http.ListenAndServe(httpPort, mux)
+	return http.ListenAndServe("localhost"+httpPort, mux)
 }
 
 func runGRPCServer() error {
-	lis, err := net.Listen("tcp", ":9090")
+	lis, err := net.Listen("tcp", grcpPort)
 	if err != nil {
 		log.Fatalf("Error: %v", err)
 	}
@@ -42,7 +42,7 @@ func runGRPCServer() error {
 	s := grpc.NewServer()
 	pb.RegisterApiServer(s, &server{})
 
-	log.Printf("gRPC server: %s\n", ":9090")
+	log.Printf("gRPC server: %s\n", grcpPort)
 	return s.Serve(lis)
 }
 
@@ -59,7 +59,7 @@ func main() {
 	}
 }
 
-func (s *server) CalculateSum(ctx context.Context, req *pb.Request) (*pb.Response, error) {
+func (s *server) CalculateSum(_ context.Context, req *pb.Request) (*pb.Response, error) { // доделать
 	var wg sync.WaitGroup
 	parts := 10                          // кол-во потоков
 	partSize := len(req.Numbers) / parts // кол-во чисел в потоке
