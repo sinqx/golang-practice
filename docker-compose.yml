@@ -4,7 +4,6 @@ services:
     build:
       context: .
       dockerfile: DockerFile
-    container_name: my_server
+    container_name: server3
     ports:
-      - "9090:9090"
-############################# not finished
+      - "8090:8090"

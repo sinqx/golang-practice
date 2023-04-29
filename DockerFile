@@ -8,5 +8,6 @@ COPY . ./
 
 RUN go mod download
 
-#RUN go build -o ./cmd/bin/server/server ./server && go build -o ./cmd/bin/client/client ./client
-####################### not finished
+RUN go build -o ./cmd/bin/server3 ./server3
+
+ENTRYPOINT ["/testTask/cmd/bin/server3"]
