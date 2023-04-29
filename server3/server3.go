@@ -17,18 +17,14 @@ type server struct {
 }
 
 func main() {
-	// Create a listener on TCP port
 	lis, err := net.Listen("tcp", ":8080")
 	if err != nil {
 		log.Fatalln("Failed to listen:", err)
 	}
 
-	// Create a gRPC server object
 	s := grpc.NewServer()
 
 	pb.RegisterApiServer(s, &server{})
-
-	// Serve gRPC server
 	log.Printf("Serving gRPC on %s:%s", "localhost", "8080")
 	go func() {
 		log.Fatalln(s.Serve(lis))
@@ -45,7 +41,6 @@ func main() {
 	}
 
 	gwmux := runtime.NewServeMux()
-	// Register User Service
 	err = pb.RegisterApiHandler(context.Background(), gwmux, conn)
 	if err != nil {
 		log.Fatalln("Failed to register gateway:", err)
