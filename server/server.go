@@ -1,7 +1,5 @@
-// ///////////////////////////// deprecated ///////////////////////////////
+// ///////////////////////////// client/server ///////////////////////////////
 package main
-
-import "sync"
 
 import (
 	"context"
@@ -11,48 +9,17 @@ import (
 	"log"
 	"net"
 	"net/http"
-	. "testTask/pkg/api"
-	"tt/pkg/api"
+	pb "tt/pkg/api"
+	"tt/service"
 )
 
 type server struct {
-	UnimplementedApiServer
-}
-
-func (s *server) CalculateSum(ctx context.Context, req *Request) (*Response, error) {
-	var wg sync.WaitGroup
-	parts := 10                          // кол-во потоков
-	partSize := len(req.Numbers) / parts // кол-во чисел в потоке
-	results := make(chan int, parts)     // канал для получения результата
-	for i := 0; i < parts; i++ {
-		wg.Add(1)
-		start := i * partSize   // начало слайса
-		end := start + partSize // конец слайса
-		go func() {
-			defer wg.Done()
-			sum := 0
-			for _, num := range req.Numbers[start:end] {
-				sum += int(num.Nums)
-			}
-			results <- sum
-		}()
-	}
-
-	go func() {
-		wg.Wait()
-		close(results)
-	}()
-
-	total := 0
-	for res := range results {
-		total += res
-	}
-	return &Response{Sum: int64(total)}, nil
+	pb.UnimplementedApiServer
 }
 
 const (
-	grpcPort = ":50051"
-	httpPort = ":8080"
+	grpcPort = ":8080"
+	httpPort = ":8090"
 )
 
 func main() {
@@ -62,7 +29,7 @@ func main() {
 
 	// Start a gRPC server
 	grpcServer := grpc.NewServer()
-	RegisterApiServer(grpcServer, &server{})
+	pb.RegisterApiServer(grpcServer, &server{})
 	reflection.Register(grpcServer)
 
 	listen, err := net.Listen("tcp", grpcPort)
@@ -71,7 +38,7 @@ func main() {
 	}
 
 	s := grpc.NewServer()
-	RegisterApiServer(s, &server{})
+	pb.RegisterApiServer(s, &server{})
 
 	log.Printf("Port: %v", listen.Addr())
 	go func() {
@@ -81,7 +48,7 @@ func main() {
 	// Start a HTTP server
 	mux := runtime.NewServeMux()
 	opts := []grpc.DialOption{grpc.WithInsecure()}
-	err = api.RegisterApiHandlerFromEndpoint(ctx, mux, grpcPort, opts)
+	err = pb.RegisterApiHandlerFromEndpoint(ctx, mux, grpcPort, opts)
 	if err != nil {
 		log.Fatalf("Failed to start HTTP server: %v", err)
 	}
@@ -90,4 +57,8 @@ func main() {
 	if err := http.ListenAndServe(httpPort, mux); err != nil {
 		log.Fatalf("Failed to start HTTP server: %v", err)
 	}
+}
+
+func (s *server) CalculateSum(_ context.Context, req *pb.Request) (*pb.Response, error) { // доделать
+	return &pb.Response{Sum: service.Calculate(req.Numbers)}, nil
 }

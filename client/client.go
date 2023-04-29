@@ -36,6 +36,4 @@ func main() {
 	}
 
 	fmt.Printf("Sum: %d\n", res.Sum)
-	//	fmt.Printf("Port: %d\n", conn.)
-
 }
