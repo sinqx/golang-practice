@@ -27,7 +27,7 @@ func runHTTPServer(ctx context.Context) error {
 	opts := []grpc.DialOption{grpc.WithInsecure(), grpc.WithDefaultCallOptions(
 		grpc.MaxCallRecvMsgSize(maxMsgSize),
 		grpc.MaxCallSendMsgSize(maxMsgSize))}
-	err := pb.RegisterApiHandlerFromEndpoint(ctx, mux, httpPort, opts)
+	err := pb.RegisterApiHandlerFromEndpoint(ctx, mux, ":"+grpcPort, opts)
 	if err != nil {
 		log.Fatalf("Starting HTTP server Error: %v", err)
 	}
