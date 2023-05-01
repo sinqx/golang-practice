@@ -21,7 +21,7 @@ const (
 	httpPort string = ":8090"
 )
 
-func runHTTPServer(ctx context.Context) error {
+func runHTTPServer(ctx context.Context, grpcPort string, httpPort string) error {
 	mux := runtime.NewServeMux()
 
 	opts := []grpc.DialOption{grpc.WithInsecure()}
@@ -56,14 +56,14 @@ func main() {
 
 	conn, err := grpc.DialContext(
 		context.Background(),
-		"0.0.0.0:8080",
+		fmt.Sprintf("0.0.0.0%s", grpcPort),
 		grpc.WithBlock(),
 		grpc.WithInsecure())
 	if err != nil {
 		log.Fatalln("Failed to dial server:", err)
 	}
 	gwmux := runtime.NewServeMux()
-	// Register User Service
+
 	err = pb.RegisterApiHandler(context.Background(), gwmux, conn)
 	if err != nil {
 		log.Fatalln("Failed to register gateway:", err)
@@ -74,7 +74,7 @@ func main() {
 		Handler: gwmux,
 	}
 	ctx := context.Background()
-	if err := runHTTPServer(ctx); err != nil {
+	if err := runHTTPServer(ctx, grpcPort, httpPort); err != nil {
 		log.Fatalf("HTTP Error: %v", err)
 	}
 	log.Fatalln(gwServer.ListenAndServe())
