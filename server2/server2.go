@@ -23,11 +23,9 @@ const (
 
 func runHTTPServer(ctx context.Context) error {
 	mux := runtime.NewServeMux()
-	maxMsgSize := 1024 * 1024 * 20
-	opts := []grpc.DialOption{grpc.WithInsecure(), grpc.WithDefaultCallOptions(
-		grpc.MaxCallRecvMsgSize(maxMsgSize),
-		grpc.MaxCallSendMsgSize(maxMsgSize))}
-	err := pb.RegisterApiHandlerFromEndpoint(ctx, mux, ":"+grpcPort, opts)
+
+	opts := []grpc.DialOption{grpc.WithInsecure()}
+	err := pb.RegisterApiHandlerFromEndpoint(ctx, mux, grpcPort, opts)
 	if err != nil {
 		log.Fatalf("Starting HTTP server Error: %v", err)
 	}
@@ -56,16 +54,11 @@ func main() {
 		}
 	}()
 
-	maxMsgSize := 1024 * 1024 * 20
 	conn, err := grpc.DialContext(
 		context.Background(),
 		"0.0.0.0:8080",
 		grpc.WithBlock(),
-		grpc.WithInsecure(),
-		grpc.WithDefaultCallOptions(
-			grpc.MaxCallRecvMsgSize(maxMsgSize),
-			grpc.MaxCallSendMsgSize(maxMsgSize)),
-	)
+		grpc.WithInsecure())
 	if err != nil {
 		log.Fatalln("Failed to dial server:", err)
 	}
@@ -90,10 +83,3 @@ func main() {
 func (s *server) CalculateSum(_ context.Context, req *pb.Request) (*pb.Response, error) {
 	return &pb.Response{Sum: service.Calculate(req.Numbers)}, nil
 }
-
-// Ошибка - Insomnia
-//	{
-//		"code": 14,
-//		"message": "connection error: desc = \"error reading server preface: http2: frame too large\"",
-//		"details": []
-//	}
